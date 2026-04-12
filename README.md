@@ -2,12 +2,13 @@
 
 Lightweight and scalable Discord bot built with Node.js for moderation, automation, and media tools.
 
-<img width="50" height="50" alt="image" src="https://github.com/user-attachments/assets/64a087bd-55b1-4304-b22a-3cf2713d4e79" />
+Dashboard System Bot :
 
-<img width="50" height="50" alt="image" src="https://github.com/user-attachments/assets/653cd882-a0ae-42f4-82e8-48458ead8c3d" />
+<img width="1393" height="833" alt="Screenshot 2026-04-12 204644" src="https://github.com/user-attachments/assets/b792024d-6f5a-4daf-b0f1-95f1dbaef69a" />
 
 ---
-<img width="1135" height="805" alt="image" src="https://github.com/user-attachments/assets/7f4c29e3-5020-47da-bf50-871299905054" />
+
+<img width="1391" height="883" alt="Screenshot 2026-04-12 204654" src="https://github.com/user-attachments/assets/e0c77746-cfc0-42d6-b343-17aff547d23c" />
 
 ---
 
