@@ -55,7 +55,6 @@ Create a `.env` file:
  DASHBOARD_API_KEY=change_this_to_a_strong_random_key
  DASHBOARD_PORT=4523
 
----
 
 ## Structure
 
