@@ -1,5 +1,7 @@
 # Discord System Bot
 
+<img width="100" height="100" alt="image" src="https://github.com/user-attachments/assets/0b76316e-e50a-4de9-83c1-cf8851a09438" />
+
 
 <img width="100" height="100" alt="image" src="https://github.com/user-attachments/assets/64a087bd-55b1-4304-b22a-3cf2713d4e79" />
 
