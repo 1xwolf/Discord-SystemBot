@@ -71,18 +71,4 @@ npm start
 
 ---
 
-## Structure
 
-```
-commands/
-events/
-handlers/
-utils/
-index.js
-```
-
----
-
-## License
-
-MIT
