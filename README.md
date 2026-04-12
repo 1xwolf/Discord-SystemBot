@@ -43,7 +43,7 @@ Create `config.json`:
 
 ---
 
-### Option 2: config.js (Recommended)
+### Option 2: config.js 
 
 ```js id="c0nfig2"
 require('dotenv').config();
@@ -54,8 +54,6 @@ const config = {
   prefix: '!',
   owners: [''],
   Guild: '',
-  dashboardApiKey: process.env.DASHBOARD_API_KEY || 'syestm_dash_2025_secure_key',
-  dashboardPort: parseInt(process.env.DASHBOARD_PORT) || 4523,
 };
 
 module.exports = config;
