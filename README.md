@@ -56,18 +56,3 @@ Create a `.env` file:
  DASHBOARD_PORT=4523
 
 
-## Structure
-
-```
-commands/
-events/
-handlers/
-utils/
-index.js
-```
-
----
-
-## License
-
-MIT
