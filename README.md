@@ -18,7 +18,7 @@ Lightweight and scalable Discord bot built with Node.js for moderation, automati
 ## Installation
 
 ```bash id="k1l2m3"
-git clone <repo>
+git clone
 cd project
 npm install
 ```
