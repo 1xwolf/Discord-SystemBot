@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Syestm — لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#000000;--bg1:#0a0a0f;--bg2:#0d0e18;--bg3:#121320;--bg4:#181929;
+  --border:#1a1b2e;--border2:#22243a;
+  --gold:#d4a437;--gold2:#b8892b;--gold-glow:rgba(212,164,55,.15);--gold-faint:rgba(212,164,55,.06);
+  --green:#3fb950;--red:#f85149;--yellow:#d4a437;--cyan:#58a6ff;
+  --text:#c9d1d9;--muted:#6e7681;--muted2:#2a2b3d;
+  --font:'IBM Plex Sans Arabic',sans-serif;--mono:'JetBrains Mono',monospace;
+  --radius:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:#000;color:var(--text);min-height:100vh;display:flex}
+
+/* ── Meteor canvas ── */
+#meteor-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+.sidebar,.main{position:relative;z-index:1}
+.sidebar{background:rgba(5,5,10,.88)!important;backdrop-filter:blur(14px)}
+.topbar{background:rgba(5,5,10,.82)!important;backdrop-filter:blur(14px)}
+
+.logo-icon:hover #logoHover{display:flex!important}
+.logo-icon svg{transition:opacity .15s}
+.logo-icon:hover svg{opacity:.3}
+.ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ico svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Sidebar ── */
+.sidebar{width:230px;min-height:100vh;background:var(--bg1);border-left:1px solid var(--border);display:flex;flex-direction:column;position:fixed;right:0;top:0;bottom:0;z-index:100;overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.sidebar-logo{padding:18px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 18px var(--gold-glow)}
+.logo-icon svg{width:18px;height:18px;fill:none;stroke:#0e1117;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.logo-text{font-size:15px;font-weight:700;letter-spacing:.3px}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:1px}
+
+.bot-card{margin:10px;padding:11px 13px;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
+.bot-card-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.bot-avatar{width:30px;height:30px;border-radius:50%;background:var(--bg4);flex-shrink:0;object-fit:cover}
+.bot-name{font-size:13px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;border:2px solid var(--bg2)}
+.s-dot.online{background:var(--green)}.s-dot.idle{background:var(--yellow)}.s-dot.dnd{background:var(--red)}.s-dot.offline{background:var(--muted2)}
+.bot-ping{font-size:10px;color:var(--muted);font-family:var(--mono)}
+
+.guild-wrap{padding:8px 10px;border-bottom:1px solid var(--border)}
+.guild-wrap label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;display:block;margin-bottom:5px}
+select.gp{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:7px;font-family:var(--font);font-size:12px;cursor:pointer;outline:none;transition:border-color .15s}
+select.gp:focus{border-color:var(--gold)}
+
+.nav{flex:1;padding:6px 0}
+.nav-sec{padding:12px 14px 4px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;font-size:12.5px;color:var(--muted);transition:all .15s;position:relative;user-select:none;border-left:2px solid transparent}
+.ni:hover{color:var(--text);background:var(--gold-faint)}
+.ni.active{color:var(--gold);background:var(--gold-faint);border-left-color:var(--gold)}
+.ni-icon{width:16px;height:16px;flex-shrink:0}
+.ni-badge{margin-right:auto;font-size:9px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--gold-glow);color:var(--gold)}
+
+/* ── Main ── */
+.main{margin-right:230px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{padding:13px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg1);position:sticky;top:0;z-index:50;gap:12px}
+.pt{font-size:16px;font-weight:700;letter-spacing:.2px}.ps{font-size:11px;color:var(--muted);margin-top:1px}
+.tba{display:flex;gap:8px;align-items:center;flex-shrink:0}
+
+/* ── Buttons ── */
+.btn{border:none;padding:7px 15px;border-radius:8px;font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--gold);color:#080a0e}.btn-p:hover{background:var(--gold2);box-shadow:0 0 14px var(--gold-glow)}
+.btn-d{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}.btn-d:hover{background:rgba(248,81,73,.25)}
+.btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border)}.btn-s:hover{border-color:var(--muted)}
+.btn:active{transform:translateY(1px)}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.content{padding:22px;flex:1}
+.page{display:none;animation:fu .2s ease}.page.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ── Cards ── */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+.ch{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ch-i{width:18px;height:18px;flex-shrink:0;color:var(--gold)}
+.ch-i svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ch-t{font-size:13.5px;font-weight:600}.ch-s{font-size:10.5px;color:var(--muted);margin-top:2px}
+.ch-actions{margin-right:auto;display:flex;gap:8px}
+.cb{padding:16px}
+
+/* ── Grids ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ── Stat Cards ── */
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--sc-color,var(--gold)),transparent);opacity:.4}
+.sv{font-size:24px;font-weight:700;font-family:var(--mono);line-height:1}
+.sl{font-size:10.5px;color:var(--muted);margin-top:5px}
+.si{width:22px;height:22px;margin-bottom:10px;color:var(--sc-color,var(--gold))}
+.si svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sc.green{--sc-color:var(--green)}.sc.red{--sc-color:var(--red)}.sc.yellow{--sc-color:var(--yellow)}.sc.cyan{--sc-color:var(--cyan)}
+
+/* ── Form fields ── */
+.f{margin-bottom:13px}.f:last-child{margin-bottom:0}
+.f label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.f input,.f select,.f textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:7px;font-family:var(--font);font-size:12.5px;outline:none;transition:border-color .15s}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--gold);background:var(--bg4)}
+.f textarea{resize:vertical;min-height:72px}
+.f input[type=color]{padding:3px 5px;height:34px;cursor:pointer}
+.f input[readonly]{opacity:.5;cursor:default}
+.hint{font-size:11px;color:var(--muted);margin-top:5px;padding:8px 10px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);line-height:1.5}
+
+/* ── Toggle ── */
+.tr{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.tr:last-child{border-bottom:none;padding-bottom:0}.tr:first-child{padding-top:0}
+.tl{font-size:13px;font-weight:500}.ts{font-size:10.5px;color:var(--muted);margin-top:2px}
+.tg{position:relative;width:40px;height:20px;flex-shrink:0}
+.tg input{display:none}
+.tg-t{position:absolute;inset:0;background:var(--bg4);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s}
+.tg input:checked~.tg-t{background:var(--gold);border-color:var(--gold)}
+.tg-th{position:absolute;top:3px;right:3px;width:12px;height:12px;background:var(--muted);border-radius:50%;transition:all .2s;pointer-events:none}
+.tg input:checked~.tg-t .tg-th{background:#080a0e;transform:translateX(-18px)}
+
+/* ── Status selector ── */
+.sbtn{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 8px;cursor:pointer;text-align:center;transition:all .15s;flex:1}
+.sbtn:hover{border-color:var(--muted)}
+.sbtn.ao{border-color:var(--green);background:rgba(63,185,80,.08)}
+.sbtn.ai{border-color:var(--yellow);background:rgba(212,164,55,.08)}
+.sbtn.ad{border-color:var(--red);background:rgba(248,81,73,.08)}
+.sbtn.aof{border-color:var(--muted2);background:rgba(48,54,61,.5)}
+.sbd{width:10px;height:10px;border-radius:50%;margin:0 auto 6px}
+.sbl{font-size:11px;font-weight:600}
+
+/* ── Log grid ── */
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+@media(max-width:700px){.lg{grid-template-columns:1fr}}
+.li{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:8px}
+.li-icon{width:14px;height:14px;flex-shrink:0;color:var(--muted)}
+.li-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.li-name{font-size:12px;font-weight:500;min-width:80px;color:var(--text)}
+.li select{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 7px;border-radius:6px;font-size:11px;font-family:var(--font);outline:none}
+.li select:focus{border-color:var(--gold)}
+
+/* ── Style selector ── */
+.stc{display:flex;gap:10px;flex-wrap:wrap}
+.stc .sc2{flex:1;min-width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:13px;cursor:pointer;transition:all .15s;text-align:center}
+.stc .sc2:hover{border-color:var(--muted)}.stc .sc2.sel{border-color:var(--gold);background:var(--gold-faint)}
+.sc2-i{width:24px;height:24px;margin:0 auto 8px;color:var(--gold)}
+.sc2-i svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sc2-t{font-size:13px;font-weight:600}.sc2-s{font-size:10.5px;color:var(--muted);margin-top:3px}
+
+/* ── Command collapsibles ── */
+.cc{margin-bottom:10px}
+.cc-h{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px 10px 0 0;cursor:pointer;user-select:none}
+.cc-h:hover{background:var(--bg3)}.cc-t{font-size:13px;font-weight:700;flex:1}.cc-n{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.cc-a{transition:transform .2s;color:var(--muted)}.cc-a.cl{transform:rotate(-90deg)}
+.cc-a svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.cc-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden}
+.ci{display:flex;align-items:center;gap:9px;padding:9px 13px;background:var(--bg1);transition:background .1s}
+.ci:hover{background:var(--bg2)}.ci.dis{opacity:.35}
+.cn{font-size:12px;font-weight:700;font-family:var(--mono);color:var(--gold);flex:1}
+.cd{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
+.ca{font-size:10px;color:var(--muted2)}
+.cr{display:flex;gap:8px;align-items:center}
+.cp{width:34px;height:34px;border-radius:7px;border:1px solid var(--border);flex-shrink:0}
+
+/* ── Avatar area ── */
+.av-w{display:flex;align-items:center;gap:14px}
+.av-p{width:60px;height:60px;border-radius:50%;background:var(--bg4);border:2px solid var(--border2);object-fit:cover;flex-shrink:0}
+
+/* ── Leaderboard ── */
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .1s}
+.lb-row:last-child{border-bottom:none}.lb-row:hover{background:var(--bg2)}
+.lb-rank{font-size:13px;font-weight:700;font-family:var(--mono);min-width:26px;color:var(--muted);text-align:center}
+.lb-rank.top1{color:#d4a437}.lb-rank.top2{color:#8b95a1}.lb-rank.top3{color:#b07c4b}
+.lb-av{width:34px;height:34px;border-radius:50%;object-fit:cover;background:var(--bg4);flex-shrink:0}
+.lb-info{flex:1}
+.lb-name{font-size:13px;font-weight:600}.lb-tag{font-size:11px;color:var(--muted)}
+.lb-stats{text-align:left;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.lb-xp{font-size:13px;font-weight:700;color:var(--gold);font-family:var(--mono)}
+.lb-lvl{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ── Audit log ── */
+.al-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.al-row:last-child{border-bottom:none}
+.al-icon{width:16px;height:16px;flex-shrink:0;color:var(--red)}
+.al-icon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.al-body{flex:1}
+.al-action{font-size:12px;font-weight:600;font-family:var(--mono);color:var(--red)}
+.al-user{font-size:11px;color:var(--muted);margin-top:2px}
+.al-punishment{font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(248,81,73,.12);color:var(--red);font-weight:700}
+.al-time{font-size:10px;color:var(--muted);font-family:var(--mono);flex-shrink:0;text-align:left}
+
+/* ── Protection limit grid ── */
+.pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px}
+.pl-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pl-name{font-size:11.5px;font-weight:600;font-family:var(--mono);color:var(--gold);flex:1}
+.pl-input{width:58px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:6px;font-family:var(--mono);font-size:12px;text-align:center;outline:none}
+.pl-input:focus{border-color:var(--gold)}
+
+/* ── Server stats ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px}
+.stat-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:13px;text-align:center}
+.stat-val{font-size:21px;font-weight:700;font-family:var(--mono)}
+.stat-lbl{font-size:10.5px;color:var(--muted);margin-top:4px}
+
+/* ── Bypass list ── */
+.bypass-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bypass-tag{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;font-family:var(--mono)}
+.bypass-rm{cursor:pointer;color:var(--red);font-size:14px;line-height:1;opacity:.7}.bypass-rm:hover{opacity:1}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:9px;font-size:13px;z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px;box-shadow:0 8px 30px rgba(0,0,0,.5);pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{border-color:var(--green)}#toast.error{border-color:var(--red)}#toast.info{border-color:var(--gold)}
+.toast-ico{width:14px;height:14px;flex-shrink:0}
+.toast-ico svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#toast.success .toast-ico{color:var(--green)}#toast.error .toast-ico{color:var(--red)}#toast.info .toast-ico{color:var(--gold)}
+
+/* ── API Key modal ── */
+#apiModal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:9998;backdrop-filter:blur(6px)}
+#apiModal.hidden{display:none}
+.api-box{background:var(--bg1);border:1px solid var(--border2);border-radius:14px;padding:30px;width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.api-box-icon{width:44px;height:44px;margin:0 auto 14px;background:var(--gold-faint);border:1px solid rgba(212,164,55,.3);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.api-box-icon svg{width:22px;height:22px;fill:none;stroke:var(--gold);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.api-box h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.api-box p{font-size:12.5px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.api-box input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-family:var(--mono);font-size:13px;outline:none;margin-bottom:12px;text-align:center}
+.api-box input:focus{border-color:var(--gold)}
+
+/* ── Misc ── */
+.tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.tg-g{background:rgba(63,185,80,.12);color:var(--green)}.tg-r{background:rgba(248,81,73,.12);color:var(--red)}
+.tg-y{background:rgba(212,164,55,.12);color:var(--yellow)}.tg-b{background:var(--gold-glow);color:var(--gold)}
+.empty{color:var(--muted);font-size:13px;padding:20px;text-align:center}
+.divider{height:1px;background:var(--border);margin:13px 0}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<canvas id="meteor-canvas"></canvas>
+
+<!-- SVG icon defs -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- bot/robot -->
+    <symbol id="i-bolt" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="3" ry="3"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/><circle cx="9" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none"/><path d="M9 18h6" stroke-linecap="round"/><line x1="12" y1="2" x2="12" y2="4"/></symbol>
+    <!-- dashboard -->
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <!-- stats -->
+    <symbol id="i-chart" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+    <!-- leaderboard -->
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></symbol>
+    <!-- welcome -->
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M7.76 2.83L6 7h12l-1.76-4.17A2 2 0 0 0 14.4 2H9.6a2 2 0 0 0-1.84 1.17v0z"/><path d="M6 7v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7"/><path d="M12 12v4"/><path d="M9.5 14.5s.5 1.5 2.5 1.5 2.5-1.5 2.5-1.5"/></symbol>
+    <!-- logs -->
+    <symbol id="i-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+    <!-- security -->
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <!-- protection/lock -->
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <!-- commands -->
+    <symbol id="i-cmd" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
+    <!-- audit -->
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+    <!-- bot config -->
+    <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+    <!-- members -->
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <!-- ping -->
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
+    <!-- uptime -->
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <!-- guilds -->
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+    <!-- bot info -->
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></symbol>
+    <!-- status -->
+    <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></symbol>
+    <!-- avatar/image -->
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+    <!-- edit/name -->
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+    <!-- key -->
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+    <!-- refresh -->
+    <symbol id="i-refresh" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+    <!-- power/restart -->
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></symbol>
+    <!-- save -->
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+    <!-- chevron -->
+    <symbol id="i-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+    <!-- check -->
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <!-- alert -->
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+    <!-- x/error -->
+    <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <!-- chat/messages -->
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <!-- ban/hammer -->
+    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></symbol>
+    <!-- link -->
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <!-- role -->
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+    <!-- voice -->
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></symbol>
+    <!-- bypass/person -->
+    <symbol id="i-person" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <!-- limits/slider -->
+    <symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+    <!-- embed -->
+    <symbol id="i-embed" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+    <!-- photo/banner -->
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+  </defs>
+</svg>
+
+<!-- API Key Modal -->
+<div id="apiModal">
+  <div class="api-box">
+    <div class="api-box-icon"><svg><use href="#i-key"/></svg></div>
+    <h2>مصادقة لوحة التحكم</h2>
+    <p>أدخل مفتاح API للوصول إلى لوحة التحكم<br><small style="color:var(--muted2)">(DASHBOARD_API_KEY في ملف .env)</small></p>
+    <input type="password" id="apiKeyInput" placeholder="أدخل المفتاح هنا..." autocomplete="off">
+    <button class="btn btn-p" style="width:100%;justify-content:center" onclick="submitApiKey()">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      دخول
+    </button>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon" id="logoIconWrap" onclick="toggleIconPicker()" title="تغيير الأيقونة" style="cursor:pointer;overflow:hidden;position:relative">
+      <svg id="logoSvg"><use href="#i-bolt"/></svg>
+      <img id="logoImg" src="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:9px;position:absolute;inset:0">
+      <div id="logoHover" style="position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;border-radius:9px">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><use href="#i-edit"/></svg>
+      </div>
+    </div>
+    <div><div class="logo-text">Syestm Bot</div><div class="logo-sub">لوحة التحكم</div></div>
+  </div>
+
+  <!-- Icon Picker Popup -->
+  <div id="iconPicker" style="display:none;margin:0 10px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px;animation:fu .15s ease">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">تغيير الأيقونة</div>
+    <!-- Upload -->
+    <label style="display:flex;align-items:center;gap:7px;background:var(--bg4);border:1px dashed var(--border2);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;color:var(--muted);transition:border-color .15s;margin-bottom:8px" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)'">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      رفع صورة
+      <input type="file" accept="image/*" style="display:none" onchange="setLogoFromFile(this)">
+    </label>
+    <!-- URL -->
+    <div style="display:flex;gap:6px">
+      <input id="logoUrlInput" placeholder="أو الصق رابط صورة..." style="flex:1;background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:11.5px;font-family:var(--font);outline:none" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'" onkeydown="if(event.key==='Enter')setLogoFromUrl()">
+      <button onclick="setLogoFromUrl()" style="background:var(--gold);border:none;color:#000;padding:7px 11px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">تطبيق</button>
+    </div>
+    <!-- Reset -->
+    <button onclick="resetLogo()" style="margin-top:8px;width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font)" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">إعادة تعيين</button>
+  </div>
+
+  <div class="bot-card">
+    <div class="bot-card-top">
+      <img class="bot-avatar" id="sideAv" src="" onerror="this.style.display='none'">
+      <div class="bot-name" id="sideNm">جاري التحميل...</div>
+      <div class="s-dot offline" id="sideDot"></div>
+    </div>
+    <div class="bot-ping" id="sidePing">ping: —</div>
+  </div>
+
+  <div class="guild-wrap">
+    <label>السيرفر النشط</label>
+    <select class="gp" id="guildSelect" onchange="onGuildChange()">
+      <option value="">اختر سيرفر...</option>
+    </select>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-sec">عام</div>
+    <div class="ni active" onclick="go('dashboard')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg></span> لوحة المعلومات
+    </div>
+    <div class="ni" onclick="go('stats')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-chart"/></svg></span> إحصائيات السيرفر
+    </div>
+    <div class="ni" onclick="go('leaderboard')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></span> المتصدرين
+    </div>
+
+    <div class="nav-sec">إعدادات</div>
+    <div class="ni" onclick="go('welcome')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-wave"/></svg></span> رسالة الترحيب
+    </div>
+    <div class="ni" onclick="go('logs')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-list"/></svg></span> قنوات السجلات
+    </div>
+    <div class="ni" onclick="go('security')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg></span> الأمان
+    </div>
+    <div class="ni" onclick="go('protection')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></span> نظام الحماية
+    </div>
+    <div class="ni" onclick="go('commands')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-cmd"/></svg></span> الأوامر
+    </div>
+
+    <div class="nav-sec">السجلات</div>
+    <div class="ni" onclick="go('audit')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg></span> سجل الإجراءات
+    </div>
+
+    <div class="nav-sec">البوت</div>
+    <div class="ni" onclick="go('botconfig')">
+      <span class="ni-icon"><svg viewBox="0 0 24 24"><use href="#i-cog"/></svg></span> إعدادات البوت
+    </div>
+  </nav>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="pt" id="pageTitle">لوحة المعلومات</div>
+      <div class="ps" id="pageSub">نظرة عامة على البوت</div>
+    </div>
+    <div class="tba">
+      <button class="btn btn-s btn-sm" onclick="refreshCurrent()">
+        <svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg> تحديث
+      </button>
+      <button class="btn btn-d btn-sm" onclick="restartBot()">
+        <svg viewBox="0 0 24 24"><use href="#i-power"/></svg> إعادة تشغيل
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="g4" style="margin-bottom:13px">
+        <div class="sc">
+          <div class="si"><svg viewBox="0 0 24 24"><use href="#i-server"/></svg></div>
+          <div class="sv" id="d-guilds">—</div><div class="sl">السيرفرات</div>
+        </div>
+        <div class="sc green">
+          <div class="si"><svg viewBox="0 0 24 24"><use href="#i-users"/></svg></div>
+          <div class="sv" id="d-members">—</div><div class="sl">الأعضاء</div>
+        </div>
+        <div class="sc cyan">
+          <div class="si"><svg viewBox="0 0 24 24"><use href="#i-wifi"/></svg></div>
+          <div class="sv" id="d-ping">—</div><div class="sl">Ping (ms)</div>
+        </div>
+        <div class="sc yellow">
+          <div class="si"><svg viewBox="0 0 24 24"><use href="#i-clock"/></svg></div>
+          <div class="sv" id="d-uptime">—</div><div class="sl">Uptime</div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch">
+            <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-cpu"/></svg></span>
+            <div><div class="ch-t">معلومات البوت</div></div>
+          </div>
+          <div class="cb">
+            <div class="av-w" style="margin-bottom:14px">
+              <img class="av-p" id="d-avatar" src="">
+              <div>
+                <div style="font-size:15px;font-weight:700" id="d-name">—</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px" id="d-status-txt">—</div>
+              </div>
+            </div>
+            <div class="f"><label>Prefix</label><input readonly id="d-prefix" value="—"></div>
+            <div class="f"><label>Node.js</label><input readonly id="d-node" value="—"></div>
+            <div class="f"><label>Memory (MB)</label><input readonly id="d-mem" value="—"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">
+            <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-radio"/></svg></span>
+            <div><div class="ch-t">حالة البوت</div></div>
+          </div>
+          <div class="cb">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="d-status-btns">
+              <div class="sbtn ao" onclick="setStatus('online')"><div class="sbd" style="background:var(--green)"></div><div class="sbl">متصل</div></div>
+              <div class="sbtn ai" onclick="setStatus('idle')"><div class="sbd" style="background:var(--yellow)"></div><div class="sbl">غائب</div></div>
+              <div class="sbtn ad" onclick="setStatus('dnd')"><div class="sbd" style="background:var(--red)"></div><div class="sbl">مشغول</div></div>
+              <div class="sbtn aof" onclick="setStatus('invisible')"><div class="sbd" style="background:var(--muted2)"></div><div class="sbl">غير مرئي</div></div>
+            </div>
+            <div class="f"><label>نوع النشاط</label>
+              <select id="d-act-type">
+                <option value="PLAYING">يلعب</option><option value="WATCHING">يشاهد</option>
+                <option value="LISTENING">يستمع</option><option value="STREAMING">يبث</option><option value="COMPETING">ينافس</option>
+              </select>
+            </div>
+            <div class="f"><label>نص النشاط</label><input id="d-act-text" placeholder="مثال: خادم عرب"></div>
+            <button class="btn btn-p" onclick="saveStatus()">
+              <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ الحالة
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ STATS ══════════ -->
+    <div class="page" id="page-stats">
+      <div class="card" id="stats-card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-chart"/></svg></span>
+          <div><div class="ch-t">إحصائيات السيرفر</div><div class="ch-s" id="stats-guild-name">اختر سيرفراً أولاً</div></div>
+        </div>
+        <div class="cb">
+          <div class="stat-grid" id="stats-grid">
+            <div class="empty">اختر سيرفراً لعرض الإحصائيات</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ LEADERBOARD ══════════ -->
+    <div class="page" id="page-leaderboard">
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></span>
+          <div><div class="ch-t">متصدرو الـ XP</div><div class="ch-s">أعلى 20 عضو في السيرفر</div></div>
+        </div>
+        <div id="lb-body">
+          <div class="empty">اختر سيرفراً لعرض المتصدرين</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ WELCOME ══════════ -->
+    <div class="page" id="page-welcome">
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-wave"/></svg></span>
+          <div><div class="ch-t">رسالة الترحيب</div><div class="ch-s">تخصيص رسائل استقبال الأعضاء</div></div>
+        </div>
+        <div class="cb">
+          <div class="f"><label>قناة الترحيب</label><select id="w-channel"><option value="">بدون</option></select></div>
+          <div class="f"><label>نمط العرض</label>
+            <div class="stc">
+              <div class="sc2 sel" id="wt-embed" onclick="selWtype('embed')">
+                <div class="sc2-i"><svg viewBox="0 0 24 24"><use href="#i-embed"/></svg></div>
+                <div class="sc2-t">Embed</div><div class="sc2-s">رسالة منسقة</div>
+              </div>
+              <div class="sc2" id="wt-msg" onclick="selWtype('msg')">
+                <div class="sc2-i"><svg viewBox="0 0 24 24"><use href="#i-msg"/></svg></div>
+                <div class="sc2-t">رسالة</div><div class="sc2-s">نص بسيط</div>
+              </div>
+              <div class="sc2" id="wt-image" onclick="selWtype('image')">
+                <div class="sc2-i"><svg viewBox="0 0 24 24"><use href="#i-photo"/></svg></div>
+                <div class="sc2-t">صورة</div><div class="sc2-s">بانر مخصص</div>
+              </div>
+            </div>
+          </div>
+          <div class="f"><label>نص الرسالة</label><textarea id="w-message" placeholder="مرحباً {user} في {server}!"></textarea></div>
+          <div class="hint">المتغيرات: {user} {server} {count} {inviter}</div>
+          <div class="f" style="margin-top:12px"><label>لون الـ Embed</label><input type="color" id="w-color" value="#d4a437"></div>
+          <button class="btn btn-p" style="margin-top:6px" onclick="saveWelcome()">
+            <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ LOGS ══════════ -->
+    <div class="page" id="page-logs">
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-list"/></svg></span>
+          <div><div class="ch-t">قنوات السجلات</div><div class="ch-s">تحديد قناة لكل نوع من الأحداث</div></div>
+          <div class="ch-actions">
+            <button class="btn btn-p btn-sm" onclick="saveLogs()">
+              <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ الكل
+            </button>
+          </div>
+        </div>
+        <div class="cb">
+          <div class="lg" id="logs-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SECURITY ══════════ -->
+    <div class="page" id="page-security">
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg></span>
+          <div><div class="ch-t">نظام الأمان</div><div class="ch-s">تفعيل وتعطيل حمايات السيرفر</div></div>
+          <div class="ch-actions">
+            <button class="btn btn-p btn-sm" onclick="saveSecurity()">
+              <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ
+            </button>
+          </div>
+        </div>
+        <div class="cb"><div id="sec-toggles"></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════ PROTECTION ══════════ -->
+    <div class="page" id="page-protection">
+      <div class="g2">
+        <div class="card">
+          <div class="ch">
+            <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></span>
+            <div><div class="ch-t">إعدادات الحماية</div></div>
+          </div>
+          <div class="cb">
+            <div class="tr">
+              <div><div class="tl">تفعيل نظام الحماية</div><div class="ts">يحمي السيرفر من الهجمات</div></div>
+              <label class="tg"><input type="checkbox" id="prot-enabled"><span class="tg-t"><span class="tg-th"></span></span></label>
+            </div>
+            <div style="height:10px"></div>
+            <div class="f"><label>قناة السجل</label><select id="prot-log-ch"><option value="">بدون</option></select></div>
+            <div class="f"><label>نوع العقوبة</label>
+              <select id="prot-punishment">
+                <option value="remove_roles">سحب الصلاحيات</option>
+                <option value="kick">طرد</option>
+                <option value="ban">حظر</option>
+              </select>
+            </div>
+            <button class="btn btn-p" onclick="saveProtection()">
+              <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">
+            <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-person"/></svg></span>
+            <div><div class="ch-t">قائمة الاستثناءات (Bypass)</div><div class="ch-s">أعضاء مستثنون من الحماية</div></div>
+          </div>
+          <div class="cb">
+            <div class="f">
+              <label>إضافة معرّف عضو</label>
+              <div style="display:flex;gap:8px">
+                <input id="bypass-input" placeholder="معرّف العضو (ID)" style="flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:7px;font-family:var(--mono);font-size:13px;outline:none">
+                <button class="btn btn-p btn-sm" onclick="addBypass()">إضافة</button>
+              </div>
+            </div>
+            <div class="bypass-list" id="bypass-list"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-sliders"/></svg></span>
+          <div><div class="ch-t">حدود الإجراءات</div><div class="ch-s">الحد الأقصى للإجراءات قبل تطبيق العقوبة (نافذة 60 دقيقة)</div></div>
+          <div class="ch-actions">
+            <button class="btn btn-p btn-sm" onclick="saveLimits()">
+              <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ الحدود
+            </button>
+          </div>
+        </div>
+        <div class="cb"><div class="pl-grid" id="prot-limits"></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════ COMMANDS ══════════ -->
+    <div class="page" id="page-commands">
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-cmd"/></svg></span>
+          <div><div class="ch-t">إدارة الأوامر</div><div class="ch-s">تفعيل / تعطيل الأوامر</div></div>
+          <div class="ch-actions">
+            <button class="btn btn-p btn-sm" onclick="saveCmds()">
+              <svg viewBox="0 0 24 24"><use href="#i-save"/></svg> حفظ
+            </button>
+          </div>
+        </div>
+        <div class="cb" id="cmd-body">
+          <div class="empty">اختر سيرفراً لإدارة الأوامر</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ AUDIT ══════════ -->
+    <div class="page" id="page-audit">
+      <div class="card">
+        <div class="ch">
+          <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-file"/></svg></span>
+          <div><div class="ch-t">سجل إجراءات الحماية</div><div class="ch-s">آخر 100 إجراء تم تطبيقه بواسطة نظام الحماية</div></div>
+          <div class="ch-actions">
+            <button class="btn btn-s btn-sm" onclick="loadAudit()">
+              <svg viewBox="0 0 24 24"><use href="#i-refresh"/></svg> تحديث
+            </button>
+          </div>
+        </div>
+        <div id="audit-body">
+          <div class="empty">اختر سيرفراً لعرض السجل</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ BOT CONFIG ══════════ -->
+    <div class="page" id="page-botconfig">
+      <div class="g2">
+        <div class="card">
+          <div class="ch">
+            <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-image"/></svg></span>
+            <div><div class="ch-t">صورة البوت</div></div>
+          </div>
+          <div class="cb">
+            <div class="av-w" style="margin-bottom:14px">
+              <img class="av-p" id="bc-av" src="">
+              <div style="flex:1">
+                <div class="f"><label>رابط الصورة الجديدة</label><input id="bc-av-url" placeholder="https://..."></div>
+                <button class="btn btn-p btn-sm" onclick="setAvatar()">تحديث</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">
+            <span class="ch-i"><svg viewBox="0 0 24 24"><use href="#i-edit"/></svg></span>
+            <div><div class="ch-t">اسم البوت</div></div>
+          </div>
+          <div class="cb">
+            <div class="f"><label>الاسم الجديد</label><input id="bc-name" placeholder="اسم البوت"></div>
+            <button class="btn btn-p btn-sm" onclick="setBotName()">تحديث</button>
+            <div class="hint" style="margin-top:10px">
+              <span style="color:var(--yellow)">تنبيه:</span> ديسكورد يسمح بتغيير الاسم مرتين فقط في الساعة.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Toast -->
+<div id="toast">
+  <span class="toast-ico" id="toast-ico">
+    <svg viewBox="0 0 24 24"><use href="#i-check"/></svg>
+  </span>
+  <span id="toast-msg">تم</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+let API_KEY     = localStorage.getItem('syestm_api_key') || '';
+let currentGuild = '';
+let bypassList   = [];
+let currentStatus = 'online';
+let logsChannels  = {};
+let disabledCmds  = [];
+let allCommands   = [];
+
+const LOG_TYPES = [
+  { key:'messages',  icon:'i-msg',    label:'الرسائل' },
+  { key:'pic',       icon:'i-image',  label:'الصور الشخصية' },
+  { key:'channels',  icon:'i-list',   label:'القنوات' },
+  { key:'nickname',  icon:'i-edit',   label:'الأسماء المستعارة' },
+  { key:'joinLeave', icon:'i-person', label:'دخول/خروج' },
+  { key:'links',     icon:'i-link',   label:'الروابط' },
+  { key:'bots',      icon:'i-cpu',    label:'البوتات' },
+  { key:'roles',     icon:'i-tag',    label:'الأدوار' },
+  { key:'voice',     icon:'i-mic',    label:'الصوت' },
+  { key:'move',      icon:'i-users',  label:'نقل الأعضاء' },
+  { key:'ban',       icon:'i-ban',    label:'الحظر' },
+  { key:'kick',      icon:'i-x',      label:'الطرد' },
+  { key:'mute',      icon:'i-mic',    label:'الكتم' },
+  { key:'timeout',   icon:'i-clock',  label:'التايم أوت' },
+  { key:'emoji',     icon:'i-tag',    label:'الإيموجيات' },
+  { key:'prison',    icon:'i-lock',   label:'السجن' },
+  { key:'warns',     icon:'i-alert',  label:'التحذيرات' },
+  { key:'voiceMute', icon:'i-mic',    label:'كتم الصوت' },
+  { key:'tmute',     icon:'i-clock',  label:'التايمر كتم' },
+];
+
+const SEC_ITEMS = [
+  { key:'antibots',         label:'Anti Bots',         desc:'منع انضمام البوتات تلقائياً' },
+  { key:'antilink',         label:'Anti Link',          desc:'منع إرسال الروابط' },
+  { key:'antispam',         label:'Anti Spam',          desc:'الحماية من السبام' },
+  { key:'antidelete',       label:'Anti Delete',        desc:'منع حذف الرسائل' },
+  { key:'anticreate',       label:'Anti Create',        desc:'منع إنشاء قنوات/أدوار' },
+  { key:'antiwebhook',      label:'Anti Webhook',       desc:'منع الـ Webhooks' },
+  { key:'antiperms',        label:'Anti Perms',         desc:'الحماية من تغيير الصلاحيات' },
+  { key:'antijoin',         label:'Anti Join',          desc:'منع الانضمام' },
+  { key:'antiservername',   label:'Anti Server Name',   desc:'منع تغيير اسم السيرفر' },
+  { key:'antiserveravatar', label:'Anti Server Avatar', desc:'منع تغيير صورة السيرفر' },
+];
+
+const PROT_LIMIT_LABELS = {
+  roleDelete:'حذف الأدوار',roleCreate:'إنشاء الأدوار',roleUpdate:'تعديل الأدوار',
+  channelDelete:'حذف القنوات',channelCreate:'إنشاء القنوات',channelUpdate:'تعديل القنوات',
+  guildUpdate:'تعديل السيرفر',MemberBanAdd:'الحظر',MemberKick:'الطرد',
+  voiceChannelDelete:'حذف غرف صوت',voiceChannelCreate:'إنشاء غرف صوت',
+  memberRoleUpdate:'تعديل أدوار الأعضاء',memberUpdate:'تعديل الأعضاء',
+};
+
+// ═══════════════════════════════════════════════════════════
+// API KEY AUTH
+// ═══════════════════════════════════════════════════════════
+function checkApiKey() {
+  if (API_KEY) { document.getElementById('apiModal').classList.add('hidden'); init(); }
+  else document.getElementById('apiModal').classList.remove('hidden');
+}
+function submitApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val) return toast('أدخل المفتاح', 'error');
+  API_KEY = val;
+  localStorage.setItem('syestm_api_key', val);
+  document.getElementById('apiModal').classList.add('hidden');
+  init();
+}
+document.getElementById('apiKeyInput').addEventListener('keydown', e => { if (e.key==='Enter') submitApiKey(); });
+
+// ═══════════════════════════════════════════════════════════
+// API HELPER
+// ═══════════════════════════════════════════════════════════
+async function api(path, opts={}) {
+  opts.headers = { ...(opts.headers||{}), 'x-api-key': API_KEY, 'Content-Type':'application/json' };
+  if (opts.body && typeof opts.body === 'object') opts.body = JSON.stringify(opts.body);
+  const r = await fetch(path, opts);
+  if (r.status === 401) {
+    localStorage.removeItem('syestm_api_key');
+    API_KEY = '';
+    document.getElementById('apiModal').classList.remove('hidden');
+    throw new Error('Unauthorized');
+  }
+  return r.json();
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+const PAGE_META = {
+  dashboard:  { title:'لوحة المعلومات',   sub:'نظرة عامة على البوت' },
+  stats:      { title:'إحصائيات السيرفر', sub:'بيانات مفصلة عن السيرفر المختار' },
+  leaderboard:{ title:'المتصدرون',        sub:'أعلى الأعضاء في نقاط الـ XP' },
+  welcome:    { title:'رسالة الترحيب',    sub:'تخصيص رسائل الاستقبال' },
+  logs:       { title:'قنوات السجلات',    sub:'تحديد قناة لكل نوع من الأحداث' },
+  security:   { title:'الأمان',           sub:'تفعيل وتعطيل حمايات السيرفر' },
+  protection: { title:'نظام الحماية',     sub:'إعدادات الحدود والعقوبات' },
+  commands:   { title:'الأوامر',          sub:'تفعيل وتعطيل الأوامر' },
+  audit:      { title:'سجل الإجراءات',   sub:'سجل نظام الحماية' },
+  botconfig:  { title:'إعدادات البوت',   sub:'تغيير صورة واسم البوت' },
+};
+function go(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+page)?.classList.add('active');
+  const evt = document.querySelector(`.ni[onclick="go('${page}')"]`);
+  if (evt) evt.classList.add('active');
+  const m = PAGE_META[page] || {};
+  document.getElementById('pageTitle').textContent = m.title || page;
+  document.getElementById('pageSub').textContent   = m.sub   || '';
+  if (page==='stats')       loadStats();
+  if (page==='leaderboard') loadLeaderboard();
+  if (page==='protection')  loadProtection();
+  if (page==='audit')       loadAudit();
+  if (page==='commands')    loadCommands();
+}
+function refreshCurrent() {
+  const active = document.querySelector('.page.active');
+  if (active) {
+    const id = active.id.replace('page-','');
+    if (id==='dashboard') loadBotInfo();
+    else go(id);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  await loadBotInfo();
+  await loadGuilds();
+  buildLogGrid();
+  buildSecToggles();
+  buildProtLimits();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOT INFO
+// ═══════════════════════════════════════════════════════════
+async function loadBotInfo() {
+  try {
+    const d = await api('/api/bot-info');
+    if (!d.online) return;
+    document.getElementById('sideAv').src     = d.avatar;
+    document.getElementById('sideNm').textContent = d.name;
+    document.getElementById('sidePing').textContent = `ping: ${d.ping}ms`;
+    const dot = document.getElementById('sideDot');
+    dot.className = 's-dot ' + (d.status || 'online');
+    document.getElementById('d-guilds').textContent  = d.guilds;
+    document.getElementById('d-members').textContent = d.members?.toLocaleString();
+    document.getElementById('d-ping').textContent    = d.ping + 'ms';
+    document.getElementById('d-uptime').textContent  = fmtUptime(d.uptime);
+    document.getElementById('d-avatar').src          = d.avatar;
+    document.getElementById('d-name').textContent    = d.name;
+    document.getElementById('d-status-txt').textContent = d.activityText ? `${d.activityType}: ${d.activityText}` : d.status;
+    document.getElementById('d-prefix').value        = d.prefix || '!';
+    document.getElementById('d-node').value          = d.nodeVersion || '—';
+    document.getElementById('d-mem').value           = d.memUsageMB + ' MB';
+    document.getElementById('bc-av').src             = d.avatar;
+    document.getElementById('d-act-type').value      = d.activityType;
+    document.getElementById('d-act-text').value      = d.activityText;
+    currentStatus = d.status;
+  } catch(e){}
+}
+function fmtUptime(s) {
+  s = Math.floor(s);
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  return `${h}h ${m}m ${sec}s`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// GUILDS
+// ═══════════════════════════════════════════════════════════
+async function loadGuilds() {
+  try {
+    const guilds = await api('/api/guilds');
+    const sel    = document.getElementById('guildSelect');
+    sel.innerHTML = '<option value="">اختر سيرفر...</option>';
+    guilds.forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.id; o.textContent = g.name + ' (' + g.memberCount + ')';
+      sel.appendChild(o);
+    });
+  } catch(e){}
+}
+async function onGuildChange() {
+  currentGuild = document.getElementById('guildSelect').value;
+  if (!currentGuild) return;
+  await loadGuildSettings();
+}
+async function loadGuildSettings() {
+  if (!currentGuild) return;
+  try {
+    const d = await api(`/api/settings/${currentGuild}`);
+    populateChannelSelect('w-channel', d.channels, d.welcome.channel);
+    document.getElementById('w-message').value = d.welcome.message;
+    document.getElementById('w-color').value   = d.welcome.color;
+    selWtype(d.welcome.type || 'embed');
+    populateChannelSelect('prot-log-ch', d.channels, d.protection?.logChannel);
+    document.getElementById('prot-enabled').checked = !!d.protection?.enabled;
+    document.getElementById('prot-punishment').value = d.protection?.punishment || 'remove_roles';
+    bypassList = d.protection?.bypass || [];
+    renderBypass();
+    const limits = d.protection?.limits || {};
+    Object.keys(limits).forEach(k => {
+      const el = document.getElementById('pl-'+k);
+      if (el) el.value = limits[k];
+    });
+    logsChannels = d.logs || {};
+    LOG_TYPES.forEach(t => {
+      const el = document.getElementById('log-'+t.key);
+      if (el) el.value = logsChannels[t.key] || '';
+    });
+    LOG_TYPES.forEach(t => {
+      const el = document.getElementById('log-'+t.key);
+      if (el) {
+        el.innerHTML = '<option value="">بدون</option>';
+        d.channels.forEach(c => {
+          const o = document.createElement('option');
+          o.value = c.id;
+          o.textContent = '#' + esc(c.name);
+          if (logsChannels[t.key] === c.id) o.selected = true;
+          el.appendChild(o);
+        });
+      }
+    });
+    populateChannelSelect('prot-log-ch', d.channels, d.protection?.logChannel);
+    SEC_ITEMS.forEach(item => {
+      const el = document.getElementById('sec-'+item.key);
+      if (el) el.checked = !!d.security?.[item.key];
+    });
+  } catch(e){}
+}
+function populateChannelSelect(id, channels, selected) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '<option value="">بدون</option>';
+  (channels||[]).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = '#' + esc(c.name);
+    if (selected === c.id) o.selected = true;
+    el.appendChild(o);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+async function loadStats() {
+  if (!currentGuild) return;
+  try {
+    const d = await api(`/api/settings/${currentGuild}/stats`);
+    document.getElementById('stats-guild-name').textContent = d.guildName || '';
+    const grid = document.getElementById('stats-grid');
+    const items = [
+      ['الأعضاء الكل',d.totalMembers],['البشر',d.humanMembers],['البوتات',d.botMembers],
+      ['المتصلون',d.onlineMembers],['القنوات الكل',d.totalChannels],['القنوات النصية',d.textChannels],
+      ['الصوتية',d.voiceChannels],['الأدوار',d.roles],['الإيموجيات',d.emojis],['السبق (XP)',d.totalXp],
+    ];
+    grid.innerHTML = items.map(([l,v])=>`<div class="stat-item"><div class="stat-val">${v??'—'}</div><div class="stat-lbl">${l}</div></div>`).join('');
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+async function loadLeaderboard() {
+  if (!currentGuild) return;
+  try {
+    const d = await api(`/api/settings/${currentGuild}/leaderboard`);
+    const body = document.getElementById('lb-body');
+    if (!d.length) { body.innerHTML='<div class="empty">لا يوجد بيانات</div>'; return; }
+    body.innerHTML = d.map((u,i)=>`
+      <div class="lb-row">
+        <div class="lb-rank ${i===0?'top1':i===1?'top2':i===2?'top3':''}">${i+1}</div>
+        <img class="lb-av" src="${esc(u.avatar)}" onerror="this.style.display='none'">
+        <div class="lb-info"><div class="lb-name">${esc(u.username)}</div><div class="lb-tag">${esc(u.tag||'')}</div></div>
+        <div><div class="lb-xp">${(u.xp||0).toLocaleString()} XP</div><div class="lb-lvl">المستوى ${u.level||0}</div></div>
+      </div>`).join('');
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// WELCOME
+// ═══════════════════════════════════════════════════════════
+let wType = 'embed';
+function selWtype(t) {
+  wType = t;
+  ['embed','msg','image'].forEach(x => document.getElementById('wt-'+x)?.classList.toggle('sel', x===t));
+}
+async function saveWelcome() {
+  if (!currentGuild) return toast('اختر سيرفراً أولاً', 'error');
+  try {
+    await api(`/api/settings/${currentGuild}/welcome`, { method:'POST', body:{
+      channel: document.getElementById('w-channel').value,
+      message: document.getElementById('w-message').value,
+      color:   document.getElementById('w-color').value,
+      type:    wType,
+    }});
+    toast('تم حفظ إعدادات الترحيب', 'success');
+  } catch(e){ toast('خطأ في الحفظ', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROTECTION
+// ═══════════════════════════════════════════════════════════
+async function loadProtection() {
+  if (!currentGuild) return;
+  try {
+    const d = await api(`/api/settings/${currentGuild}`);
+    populateChannelSelect('prot-log-ch', d.channels, d.protection?.logChannel);
+    document.getElementById('prot-enabled').checked = !!d.protection?.enabled;
+    document.getElementById('prot-punishment').value = d.protection?.punishment || 'remove_roles';
+    bypassList = d.protection?.bypass || [];
+    renderBypass();
+    const limits = d.protection?.limits || {};
+    Object.keys(PROT_LIMIT_LABELS).forEach(k => {
+      const el = document.getElementById('pl-'+k);
+      if (el) el.value = limits[k] ?? '';
+    });
+  } catch(e){}
+}
+async function saveProtection() {
+  if (!currentGuild) return toast('اختر سيرفراً أولاً', 'error');
+  try {
+    await api(`/api/settings/${currentGuild}/protection`, { method:'POST', body:{
+      enabled:    document.getElementById('prot-enabled').checked,
+      logChannel: document.getElementById('prot-log-ch').value,
+      punishment: document.getElementById('prot-punishment').value,
+      bypass:     bypassList,
+    }});
+    toast('تم حفظ إعدادات الحماية', 'success');
+  } catch(e){ toast('خطأ في الحفظ', 'error'); }
+}
+async function saveLimits() {
+  if (!currentGuild) return toast('اختر سيرفراً أولاً', 'error');
+  const limits = {};
+  Object.keys(PROT_LIMIT_LABELS).forEach(k => {
+    const el = document.getElementById('pl-'+k);
+    if (el) limits[k] = parseInt(el.value)||0;
+  });
+  try {
+    await api(`/api/settings/${currentGuild}/limits`, { method:'POST', body:{ limits } });
+    toast('تم حفظ الحدود', 'success');
+  } catch(e){ toast('خطأ في الحفظ', 'error'); }
+}
+function buildProtLimits() {
+  document.getElementById('prot-limits').innerHTML = Object.entries(PROT_LIMIT_LABELS).map(([k,l])=>`
+    <div class="pl-item">
+      <span class="pl-name">${l}</span>
+      <input class="pl-input" type="number" id="pl-${k}" min="0" max="999" value="5">
+    </div>`).join('');
+}
+function addBypass() {
+  const id = document.getElementById('bypass-input').value.trim();
+  if (!id || bypassList.includes(id)) return;
+  bypassList.push(id);
+  document.getElementById('bypass-input').value = '';
+  renderBypass();
+}
+function removeBypass(id) {
+  bypassList = bypassList.filter(x => x !== id);
+  renderBypass();
+}
+function renderBypass() {
+  document.getElementById('bypass-list').innerHTML = bypassList.map(id=>`
+    <div class="bypass-tag">${esc(id)}<span class="bypass-rm" onclick="removeBypass('${esc(id)}')">×</span></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUDIT
+// ═══════════════════════════════════════════════════════════
+async function loadAudit() {
+  if (!currentGuild) return;
+  try {
+    const d = await api(`/api/settings/${currentGuild}/audit`);
+    const body = document.getElementById('audit-body');
+    if (!d.length) { body.innerHTML='<div class="empty">لا يوجد سجلات</div>'; return; }
+    body.innerHTML = d.map(e=>`
+      <div class="al-row">
+        <div class="al-icon"><svg viewBox="0 0 24 24"><use href="#i-alert"/></svg></div>
+        <div class="al-body">
+          <div class="al-action">${esc(e.action)}</div>
+          <div class="al-user">${esc(e.user||'')}</div>
+        </div>
+        <span class="al-punishment">${esc(e.punishment||'')}</span>
+        <div class="al-time">${fmtDate(e.timestamp)}</div>
+      </div>`).join('');
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOGS
+// ═══════════════════════════════════════════════════════════
+function buildLogGrid() {
+  const ch = [];
+  document.getElementById('logs-grid').innerHTML = LOG_TYPES.map(t=>`
+    <div class="li">
+      <span class="li-icon"><svg viewBox="0 0 24 24"><use href="#${t.icon}"/></svg></span>
+      <span class="li-name">${t.label}</span>
+      <select id="log-${t.key}">
+        <option value="">بدون</option>
+        ${ch.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+async function saveLogs() {
+  if (!currentGuild) return toast('اختر سيرفراً أولاً', 'error');
+  const body = {};
+  LOG_TYPES.forEach(t => { body[t.key] = document.getElementById('log-'+t.key)?.value || ''; });
+  try {
+    await api(`/api/settings/${currentGuild}/logs`, { method:'POST', body });
+    toast('تم حفظ قنوات السجلات', 'success');
+  } catch(e){ toast('خطأ في الحفظ', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SECURITY
+// ═══════════════════════════════════════════════════════════
+function buildSecToggles() {
+  document.getElementById('sec-toggles').innerHTML = SEC_ITEMS.map(item => `
+    <div class="tr">
+      <div><div class="tl">${item.label}</div><div class="ts">${item.desc}</div></div>
+      <label class="tg"><input type="checkbox" id="sec-${item.key}"><span class="tg-t"><span class="tg-th"></span></span></label>
+    </div>`).join('');
+}
+async function saveSecurity() {
+  if (!currentGuild) return toast('اختر سيرفراً أولاً', 'error');
+  const body = {};
+  SEC_ITEMS.forEach(item => { body[item.key] = document.getElementById('sec-'+item.key)?.checked || false; });
+  try {
+    await api(`/api/settings/${currentGuild}/security`, { method:'POST', body });
+    toast('تم حفظ إعدادات الأمان', 'success');
+  } catch(e){ toast('خطأ في الحفظ', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════════════════════════
+async function loadCommands() {
+  if (!currentGuild) return;
+  try {
+    const d = await api(`/api/settings/${currentGuild}/disabled-commands`);
+    disabledCmds = d.disabled || [];
+    document.getElementById('cmd-body').innerHTML = `
+      <div class="hint" style="margin-bottom:14px">أدخل أسماء الأوامر التي تريد تعطيلها (مفصولة بفاصلة)</div>
+      <div class="f">
+        <label>الأوامر المعطلة</label>
+        <textarea id="cmds-input" style="min-height:100px;font-family:var(--mono)">${disabledCmds.join(', ')}</textarea>
+      </div>
+      <button class="btn btn-p" onclick="saveCmds()">
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><use href="#i-save"/></svg>
+        حفظ
+      </button>`;
+  } catch(e){}
+}
+async function saveCmds() {
+  if (!currentGuild) return toast('اختر سيرفراً أولاً', 'error');
+  const val  = document.getElementById('cmds-input')?.value || '';
+  const list = val.split(',').map(s=>s.trim()).filter(Boolean);
+  try {
+    await api(`/api/settings/${currentGuild}/disabled-commands`, { method:'POST', body: { disabled: list }});
+    toast('تم حفظ الأوامر', 'success');
+  } catch(e){ toast('خطأ في الحفظ', 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOT CONFIG
+// ═══════════════════════════════════════════════════════════
+async function setStatus(s) { currentStatus = s; await saveStatus(); }
+async function saveStatus() {
+  try {
+    await api('/api/bot/status', { method:'POST', body: {
+      status:       currentStatus,
+      activityType: document.getElementById('d-act-type').value,
+      activityText: document.getElementById('d-act-text').value,
+    }});
+    toast('تم تحديث الحالة', 'success');
+    setTimeout(loadBotInfo, 1000);
+  } catch(e){ toast('خطأ', 'error'); }
+}
+async function setAvatar() {
+  const url = document.getElementById('bc-av-url').value.trim();
+  if (!url) return toast('أدخل رابط صورة', 'error');
+  try {
+    await api('/api/bot/avatar', { method:'POST', body: { url } });
+    toast('تم تحديث الصورة', 'success');
+    setTimeout(loadBotInfo, 2000);
+  } catch(e){ toast('خطأ', 'error'); }
+}
+async function setBotName() {
+  const name = document.getElementById('bc-name').value.trim();
+  if (!name) return toast('أدخل اسماً', 'error');
+  try {
+    await api('/api/bot/name', { method:'POST', body: { name } });
+    toast('تم تغيير الاسم', 'success');
+    setTimeout(loadBotInfo, 2000);
+  } catch(e){ toast('خطأ', 'error'); }
+}
+async function restartBot() {
+  if (!confirm('هل أنت متأكد من إعادة تشغيل البوت؟')) return;
+  try {
+    await api('/api/bot/restart', { method:'POST', body:{} });
+    toast('جاري إعادة التشغيل...', 'info');
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+const TOAST_ICONS = {
+  success: 'i-check',
+  error:   'i-x',
+  info:    'i-bolt',
+};
+function toast(msg, type='info') {
+  const el  = document.getElementById('toast');
+  const ico = document.getElementById('toast-ico');
+  ico.innerHTML = `<svg viewBox="0 0 24 24"><use href="#${TOAST_ICONS[type]||'i-bolt'}"/></svg>`;
+  document.getElementById('toast-msg').textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 3000);
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString('ar-SA') + ' ' + d.toLocaleTimeString('ar-SA', {hour:'2-digit',minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO-REFRESH
+// ═══════════════════════════════════════════════════════════
+setInterval(() => {
+  if (document.querySelector('#page-dashboard.active')) loadBotInfo();
+}, 30000);
+
+// ═══════════════════════════════════════════════════════════
+// LOGO ICON PICKER
+// ═══════════════════════════════════════════════════════════
+function toggleIconPicker(){
+  const p = document.getElementById('iconPicker');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+function applyLogoImage(src){
+  const img = document.getElementById('logoImg');
+  const svg = document.getElementById('logoSvg');
+  img.src = src;
+  img.style.display = 'block';
+  svg.style.display = 'none';
+  document.getElementById('iconPicker').style.display = 'none';
+  localStorage.setItem('syestm_logo', src);
+}
+function setLogoFromFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => applyLogoImage(e.target.result);
+  reader.readAsDataURL(file);
+}
+function setLogoFromUrl(){
+  const url = document.getElementById('logoUrlInput').value.trim();
+  if(!url) return;
+  applyLogoImage(url);
+}
+function resetLogo(){
+  document.getElementById('logoImg').style.display = 'none';
+  document.getElementById('logoSvg').style.display = '';
+  document.getElementById('iconPicker').style.display = 'none';
+  localStorage.removeItem('syestm_logo');
+}
+// restore saved logo on load
+(function(){
+  const saved = localStorage.getItem('syestm_logo');
+  if(saved) applyLogoImage(saved);
+})();
+// close picker on outside click
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('logoIconWrap');
+  const picker = document.getElementById('iconPicker');
+  if(!wrap.contains(e.target) && !picker.contains(e.target)){
+    picker.style.display = 'none';
+  }
+});
+
+checkApiKey();
+</script>
+
+<!-- ═══ METEOR EFFECT ═══ -->
+<script>
+(function(){
+  const canvas = document.getElementById('meteor-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H;
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* ── Stars ── */
+  const STAR_COUNT = 220;
+  const stars = Array.from({length: STAR_COUNT}, () => ({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.2 + 0.2,
+    a: Math.random() * 0.7 + 0.2,
+    twinkleSpeed: Math.random() * 0.02 + 0.005,
+    twinkleDir: Math.random() > .5 ? 1 : -1,
+  }));
+
+  /* ── Meteors ── */
+  const GOLD  = [212, 164, 55];
+  const WHITE = [255, 255, 255];
+
+  class Meteor {
+    constructor(){ this.reset(true); }
+    reset(initial){
+      this.x    = Math.random() * W * 1.5;
+      this.y    = initial ? Math.random() * H * -1 : Math.random() * H * -0.4 - 20;
+      this.len  = Math.random() * 180 + 80;
+      this.spd  = Math.random() * 7 + 4;
+      this.ang  = Math.PI / 4 + (Math.random() - .5) * 0.3;
+      this.alpha= Math.random() * 0.6 + 0.4;
+      this.width= Math.random() * 1.5 + 0.5;
+      // randomly gold or white
+      this.color= Math.random() > 0.6 ? GOLD : WHITE;
+      // tail glow dots
+      this.tail = [];
+    }
+    step(){
+      this.x += Math.cos(this.ang) * this.spd;
+      this.y += Math.sin(this.ang) * this.spd;
+      this.tail.unshift({x: this.x, y: this.y});
+      if(this.tail.length > 18) this.tail.pop();
+      if(this.x > W + 200 || this.y > H + 200) this.reset(false);
+    }
+    draw(){
+      const [r,g,b] = this.color;
+      // tail gradient
+      ctx.save();
+      const grd = ctx.createLinearGradient(
+        this.x, this.y,
+        this.x - Math.cos(this.ang) * this.len,
+        this.y - Math.sin(this.ang) * this.len
+      );
+      grd.addColorStop(0, `rgba(${r},${g},${b},${this.alpha})`);
+      grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(
+        this.x - Math.cos(this.ang) * this.len,
+        this.y - Math.sin(this.ang) * this.len
+      );
+      ctx.strokeStyle = grd;
+      ctx.lineWidth   = this.width;
+      ctx.stroke();
+      // head glow
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.width * 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},${this.alpha})`;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  const meteors = Array.from({length: 8}, () => new Meteor());
+
+  // stagger spawns
+  meteors.forEach((m, i) => {
+    m.x = Math.random() * W;
+    m.y = Math.random() * H * 0.5;
+  });
+
+  let frame = 0;
+  function tick(){
+    requestAnimationFrame(tick);
+    ctx.clearRect(0, 0, W, H);
+
+    // stars
+    frame++;
+    stars.forEach(s => {
+      s.a += s.twinkleSpeed * s.twinkleDir;
+      if(s.a > 0.9 || s.a < 0.1) s.twinkleDir *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+      ctx.fill();
+    });
+
+    // spawn a new meteor occasionally
+    if(frame % 90 === 0 && Math.random() > 0.4){
+      meteors.push(new Meteor());
+      if(meteors.length > 14) meteors.shift();
+    }
+
+    meteors.forEach(m => { m.step(); m.draw(); });
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
