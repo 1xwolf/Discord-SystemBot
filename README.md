@@ -49,10 +49,11 @@ npm start
 Create a `.env` file:
 
 ```env id="g7h8i9"
+
  BOT_TOKEN=your_discord_bot_token_here
  BOT_ID=your_bot_id_here
  DASHBOARD_API_KEY=change_this_to_a_strong_random_key
- DASHBOARD_PORT=4523```
+ DASHBOARD_PORT=4523
 
 ---
 
