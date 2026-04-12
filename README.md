@@ -15,9 +15,7 @@
 <p align="center"> 
 
     في حال تريد استخدام البوت داخل Disocrd : !help
-
 </p>
----
 
 # Overview 
 
