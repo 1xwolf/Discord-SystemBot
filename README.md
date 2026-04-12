@@ -3,6 +3,9 @@
 Lightweight and scalable Discord bot built with Node.js for moderation, automation, and media tools.
 
 ---
+<img width="1135" height="805" alt="image" src="https://github.com/user-attachments/assets/7f4c29e3-5020-47da-bf50-871299905054" />
+
+---
 
 ## Features
 
