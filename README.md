@@ -46,7 +46,6 @@ Create `config.json`:
 ### Option 2: config.js 
 
 ```js id="c0nfig2"
-require('dotenv').config();
 
 const config = {
   token: process.env.BOT_TOKEN,
@@ -56,7 +55,7 @@ const config = {
   Guild: '',
 };
 
-module.exports = config;
+
 ```
 
 ---
