@@ -1,34 +1,23 @@
 # Discord System Bot
 
-A powerful, modular Discord bot built with Node.js, designed for server management, automation, and media processing.
+Lightweight and scalable Discord bot built with Node.js for moderation, automation, and media tools.
 
 ---
 
 ## Features
 
-* Moderation system (ban, kick, mute, logs)
-* Image generation & manipulation
+* Moderation system
+* Image & canvas utilities
 * Voice support
-* Database integration (SQLite)
-* API integrations (AI, external services)
-* Rate limiting & security
-* Scalable architecture
-
----
-
-## Tech Stack
-
-* **Core:** discord.js, @discordjs/voice
-* **Backend:** express, pm2
-* **Database:** sqlite3, pro.db
-* **Media:** canvas, sharp, jimp
-* **APIs:** axios, node-fetch, cloudinary, deepai
+* API integrations
+* Secure & rate-limited backend
+* Modular structure
 
 ---
 
 ## Installation
 
-```bash id="a1b2c3"
+```bash id="k1l2m3"
 git clone <repo>
 cd project
 npm install
@@ -36,23 +25,64 @@ npm install
 
 ---
 
-## Usage
+## Setup
 
-```bash id="d4e5f6"
+### Option 1: config.json
+
+Create `config.json`:
+
+```json id="c0nfig1"
+{
+  "owners": [""],
+  "Guild": "",
+  "prefix": "!",
+  "token": "",
+  "botId": ""
+}
+```
+
+---
+
+### Option 2: config.js (Recommended)
+
+```js id="c0nfig2"
+require('dotenv').config();
+
+const config = {
+  token: process.env.BOT_TOKEN,
+  botId: process.env.BOT_ID,
+  prefix: '!',
+  owners: [''],
+  Guild: '',
+  dashboardApiKey: process.env.DASHBOARD_API_KEY || 'syestm_dash_2025_secure_key',
+  dashboardPort: parseInt(process.env.DASHBOARD_PORT) || 4523,
+};
+
+module.exports = config;
+```
+
+---
+
+## Run
+
+```bash id="run1"
 npm start
 ```
 
 ---
 
-## Environment
+## Structure
 
-Create a `.env` file:
+```
+commands/
+events/
+handlers/
+utils/
+index.js
+```
 
-```env id="g7h8i9"
+---
 
- BOT_TOKEN=your_discord_bot_token_here
- BOT_ID=your_bot_id_here
- DASHBOARD_API_KEY=change_this_to_a_strong_random_key
- DASHBOARD_PORT=4523
+## License
 
-
+MIT
