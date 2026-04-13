@@ -9,7 +9,7 @@ module.exports = async (client) => {
         Server: client.guilds.cache.size,
         Members: client.users.cache.size,
         Channels: client.channels.cache.size,
-        Developer: "SAM ALSHARIF #515"
+        Developer: "1xwolf #515"
     });
 
     client.commands.forEach(command => {
