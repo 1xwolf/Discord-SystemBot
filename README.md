@@ -41,17 +41,17 @@ System Bot >
 
 | Feature | Description | - | - |
 |--------|------------|--------|-------|
-|  Moderation System | Advanced kick, ban, warnings, and tracking | 
+|  Moderation System | Advanced kick, ban, warnings, and tracking | * 
  نظام الإشراف | أوامر احترافية للكيك، البان، التحذيرات والمتابعة |
-|  Image Tools | Built-in image generation & canvas processing | 
+|  Image Tools | Built-in image generation & canvas processing | * *
  أدوات الصور | توليد الصور ومعالجة Canvas |
-|  Voice Support | Full audio playback in voice channels | 
+|  Voice Support | Full audio playback in voice channels | * 
  دعم الصوت | تشغيل صوتي متكامل في القنوات |
-|  API Integrations | Easily connect with external services | 
+|  API Integrations | Easily connect with external services | * *
  تكامل APIs | ربط مع خدمات خارجية بسهولة |
-|  Security | Rate limiting & backend protection | 
+|  Security | Rate limiting & backend protection | * 
  الحماية | حماية متقدمة و Rate limiting |
-|  Modular Structure | Clean and scalable architecture |
+|  Modular Structure | Clean and scalable architecture |* *
  هيكل معياري | كل ميزة في ملف مستقل وسهل التوسع |
 
 ---
