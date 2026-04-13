@@ -95,7 +95,7 @@ npm start
 
 ---
 
-# Project Structure | هيكل المشروع
+# Project Structure
 
 ```
 system-bot/
