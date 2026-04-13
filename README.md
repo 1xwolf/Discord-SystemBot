@@ -81,7 +81,7 @@ npm install
 
 ---
 
-## Step 2 — config.js   
+## Step 2 — dashborad config.js
 
 ```js
 const config = {
