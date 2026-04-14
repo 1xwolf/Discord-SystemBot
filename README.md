@@ -27,7 +27,7 @@
 System Bot is a Discord bot built with Node.js, designed to be fast, reliable, and easy to customize.  
 It allows you to fully manage your server — from moderation to media tools and external API integrations — all in one place.
 
-System Bot >
+نظام بوت لأدارة السيرفرات 
 هو بوت ديسكورد مكتوب بـ Node.js، صُمّم ليكون سريعاً وموثوقاً وسهل التخصيص.  
 يتيح لك إدارة السيرفر بالكامل — من الإشراف إلى أدوات الوسائط وتكامل APIs خارجية — كل ذلك من مكان واحد.
 
