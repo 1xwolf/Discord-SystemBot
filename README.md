@@ -4,7 +4,6 @@
   # System Bot
 
   **Lightweight & Scalable Discord Bot — Built with Node.js**  
-  **بوت ديسكورد خفيف الوزن وقابل للتوسع — مبني بـ Node.js**
 
   [![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
   [![Discord.js](https://img.shields.io/badge/Discord.js-v13-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.js.org)
@@ -13,9 +12,7 @@
 
   <p align="center">
 
-<img width="240" height="240" alt="Discord-logo" src="https://github.com/user-attachments/assets/172b45c1-03b6-49cb-b6b1-e099f444dc98" /> 
 
-<img width="128" height="128" alt="تصميم بدون عنوان (1)" src="https://github.com/user-attachments/assets/9377879c-26e0-4835-bd31-09f66ce262e2" />
 
   
 </p>
@@ -33,7 +30,6 @@ It allows you to fully manage your server — from moderation to media tools and
 
 ---
 
-<img width="900" height="900" alt="Screenshot 2026-04-12 204644" src="https://github.com/user-attachments/assets/23fe6104-f4e7-40f1-a604-d8fe3d0bb3b7" />
 
 
 
